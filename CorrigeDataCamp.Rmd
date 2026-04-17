@@ -11,17 +11,83 @@ editor_options:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+Importación de las librerías: 
+```{r}
+library(readxl)
+library(stringr)
+library(stringi)
+library(writexl)
+```
+
 En primer lugar, voy a guardar en una variable "fich_puntuaciones" los ficheros contenidos en la carperta de entregas que contienen la información sobre los puntos: 
 
 ```{r}
-fich_puntuaciones <- list.files("./Entregas", pattern = "puntos", recursive = TRUE, full.names = TRUE)
+fich_puntuaciones <- list.files("./Entregas", pattern = "punto", recursive = TRUE, full.names = TRUE, ignore.case = TRUE)
 ```
 
 Ahora voy a hacer lo mismo para los ficheros que contienen los certificados de las entregas:
 
 ```{r}
-fich_certificados<- list.files("./Entregas", pattern = "certificate", recursive = TRUE, full.names = TRUE)
+fich_certificados<- list.files("./Entregas", pattern = "certificate", recursive = TRUE, full.names = TRUE, ignore.case = TRUE)
 ```
+
+Una vez ya tenemos las rutas de los ficheros con la información tanto de los puntos como de los cetificados, vamos a comenzar a realizar el algoritmo que nos automatice su corrección:
+
+```{r}
+apellidos <- sapply(fich_puntuaciones, function(fichero) {
+  nombre_carpeta <- basename(dirname(fichero))
+  apellidos <- strsplit(nombre_carpeta, split = ",")[[1]][1]
+  return(apellidos)
+}, USE.NAMES = FALSE)
+
+puntos <- sapply(fich_puntuaciones, function(fichero){
+  lineas <- readLines(fichero, warn = FALSE)
+  puntos <- as.numeric(lineas[1])
+  return(puntos)
+},USE.NAMES = FALSE)
+
+df_puntos <- data.frame(Apellidos = apellidos, Puntos = puntos, stringsAsFactors = FALSE)
+nrow(df_puntos)
+length(fich_certificados)
+length(list.files("./Entregas"))
+
+```
+
+# Pregunta 1: 
+¿Todas las entregas usaron como nombre del fichero de puntos el indicado; puntos.txt? ¿Cuántas variantes hay?
+
+No todas las entregas se realizaron con el nombre de indicado, y esto se puede comprobar de la siguiente manera: 
+
+```{r}
+
+nombre_correcto <- list.files("./Entregas", pattern = "puntos.txt", recursive = TRUE, full.names = TRUE, ignore.case = TRUE)
+length(nombre_correcto)
+length(fich_puntuaciones)
+
+```
+
+La variable "fich_puntuaciones" contiene los archivos de los puntos de cada uno de los alumnos, en cambio, la nueva variable "nombre_correcto" contiene solo los archivos de los puntos de los alumnos con el nombre correcto (el indicado en el enunciado).
+
+El número de personas que cambiaron el nombre del archivo, y por lo tanto el número de variantes es: 
+
+```{r}
+abs(length(nombre_correcto) - length(fich_puntuaciones))
+
+```
+
+Hay 19 variantes del nombre.
+
+# Pregunta 2:
+
+¿Todas las entregas contienen el fichero de puntos y el justificante de realización del curso ?
+
+No todas las entregas contienen el el fichero de puntos y el justificante, lo cual se puede ver de la siguiente manera: 
+
+```{r}
+length(fich_puntuaciones) == length(fich_certificados)
+```
+
+Como las longitudes de estos dos vecetores no son las mismas, se puede deducir que no todas las personas que contienen el fichero de puntos contienen el del justificante y viceversa.
 
 
 
