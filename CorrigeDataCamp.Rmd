@@ -1,0 +1,30 @@
+---
+title: "CorrigeDataCamp"
+author: "Carmen Martínez Botella"
+date: "2026-04-17"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+En primer lugar, voy a guardar en una variable "fich_puntuaciones" los ficheros contenidos en la carperta de entregas que contienen la información sobre los puntos: 
+
+```{r}
+fich_puntuaciones <- list.files("./Entregas", pattern = "puntos", recursive = TRUE, full.names = TRUE)
+```
+
+Ahora voy a hacer lo mismo para los ficheros que contienen los certificados de las entregas:
+
+```{r}
+fich_certificados<- list.files("./Entregas", pattern = "certificate", recursive = TRUE, full.names = TRUE)
+```
+
+
+
+
+
+
