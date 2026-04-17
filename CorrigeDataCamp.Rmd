@@ -47,9 +47,6 @@ puntos <- sapply(fich_puntuaciones, function(fichero){
 },USE.NAMES = FALSE)
 
 df_puntos <- data.frame(Apellidos = apellidos, Puntos = puntos, stringsAsFactors = FALSE)
-nrow(df_puntos)
-length(fich_certificados)
-length(list.files("./Entregas"))
 
 ```
 
@@ -89,6 +86,58 @@ length(fich_puntuaciones) == length(fich_certificados)
 
 Como las longitudes de estos dos vecetores no son las mismas, se puede deducir que no todas las personas que contienen el fichero de puntos contienen el del justificante y viceversa.
 
+# Data frame final:
+
+Vamos a crear ahora el data frame "evalua_df":
+
+```{r}
+evalua_df <- data.frame(
+  Apellidos = character(),
+  puntos = numeric(),
+  NomFile = character(),
+  Puntos = character(),
+  stringsAsFactors = FALSE
+)
+
+for (fichero in fich_puntuaciones) {
+  nombre_carpeta <- basename(dirname(fichero))
+  apellido_extraido <- strsplit(nombre_carpeta, split = ",")[[1]][1]
+
+  nombre_fichero <- basename(fichero)
+
+  lineas <- readLines(fichero, warn = FALSE)
+  contenido_texto <- ifelse(length(lineas) > 0, lineas[1], "")
+
+  puntuacion_num <- as.numeric(gsub("[^0-9]", "", contenido_texto))
+
+  nueva_fila <- data.frame(
+    apellidos = trimws(apellido_extraido),
+    puntos = puntuacion_num,
+    NomFile = nombre_fichero,
+    Puntos = as.character(contenido_texto),
+    stringsAsFactors = FALSE
+  )
+  
+  evalua_df <- rbind(evalua_df, nueva_fila)
+}
+
+evalua_df <- evalua_df[order(evalua_df$apellidos), ]
+
+write_xlsx(evalua_df, "NotasRIntermedio.xlsx")
+```
+
+Por último, vamos a unir los dos data frames creados para unir la información de cada uno:
+```{r}
+alumnos_matriculados <- read_excel("AlumnosTD25_26.xlsx")
+AlumnosNotas <- merge(
+  x = alumnos_matriculados, 
+  y = evalua_df, 
+  by.x = "Apellido(s)", 
+  by.y = "apellidos", 
+  all.x = TRUE
+)
+write_xlsx(AlumnosNotas, "AlumnosNotas.xlsx")
+```
 
 
 
